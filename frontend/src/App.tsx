@@ -217,7 +217,7 @@ function App() {
         }
       }));
     }
-    else {
+    else { 
       fail(res.message);
     }
   }
