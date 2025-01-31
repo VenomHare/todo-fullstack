@@ -23,7 +23,7 @@ const Block: React.FC<Props> = ({ task, setTask, setEditBlock, setEditMode }) =>
                     </div>
                 </>
                 :
-                <div className='min-w-[25svw] max-w-[90%] min-h-[10svh] p-3 rounded-lg bg-yellow-500 cursor-pointer flex items-center justify-around' onClick={() => {
+                <div className='min-w-[25svw] max-w-[90%] min-h-[10svh] p-3 rounded-lg bg-yellow-500 cursor-pointer flex items-center justify-around' style={{backgroundColor: task?.color||"#f0b100"}} onClick={() => {
                     setTask(task);
                     setEditMode('view');
                     setEditBlock(true);

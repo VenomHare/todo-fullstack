@@ -2,11 +2,12 @@ import { Router } from "express";
 import { Todo, TodoUser } from "../db";
 import jwt from "jsonwebtoken";
 import {userMiddleware} from "../middleware/user";
+import {config} from 'dotenv';
+config();
 
 const userRouter = Router();
 
-const JWT_SECRET="aopijkmkd2k3k4k5k6kaamlklkajksndafaf0k"
-
+const JWT_SECRET = process.env.JWT_SECRET || "";
 
 userRouter.post('/signup',async (req, res) => {
     try {
@@ -36,6 +37,7 @@ userRouter.post('/signup',async (req, res) => {
 
 userRouter.post('/login', async (req, res) => {
     try {
+        console.log(JWT_SECRET);
         const { username, password } = req.body;
         console.log(req.body);
         if (!username || !password) {
@@ -73,14 +75,16 @@ userRouter.get('/todos', userMiddleware ,async (req, res) => {
 
 userRouter.post("/todo",userMiddleware,async (req, res) => {
     try{
-        const {title, description, username} = req.body;
+        const {title, description, color, username} = req.body;
         const user = await TodoUser.findOne({username});
         const todo = new Todo({
             title,
             description,
+            color,
             completed: false,
             user: user?._id
         })
+        
         await todo.save();
         await TodoUser.updateOne({username},{
             "$push":{
@@ -126,7 +130,7 @@ userRouter.put("/todo/:id", userMiddleware,async (req, res) => {
     
     try {
         const { id } = req.params;
-        const { title, description, completed, username} = req.body;
+        const { title, description, color, completed, username} = req.body;
         
         const user = await TodoUser.findOne({username});
         const todo = await Todo.findById(id);
@@ -136,16 +140,17 @@ userRouter.put("/todo/:id", userMiddleware,async (req, res) => {
             res.status(400).json({message: "Todo or User not found"});
         }
 
-
         if (!todo?.user?.equals(user?._id))
         {
             res.status(403).json({message:"Unauthorized"});
         }
+
         await Todo.updateOne({_id: todo?._id},{
             "$set":{
                 title: title,
                 description: description,
-                completed: completed
+                completed: completed,
+                color: color
             }
         })
 

@@ -8,6 +8,7 @@ export type Task = {
   id: string;
   title: string;
   description: string;
+  color: string;
   completed: boolean;
 }
 
@@ -26,10 +27,10 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<Screens>(Screens.SignIn);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
-
+  
   const ENDPOINT = "https://todosbackend.venomhare.space";
 
-  const addTask = async (title: string, description: string) => {
+  const addTask = async (title: string, description: string, color: string) => {
     const req = await fetch(`${ENDPOINT}/user/todo`, {
       method: "POST",
       headers: {
@@ -39,6 +40,7 @@ function App() {
       body: JSON.stringify({
         title,
         description,
+        color
       })
     })
     const res = await req.json();
@@ -74,7 +76,7 @@ function App() {
     }
   }
 
-  const editTask = async (id: string, title: string, description: string, completed: boolean) => {
+  const editTask = async (id: string, title: string, description: string, color:string, completed: boolean) => {
     const req = await fetch(`${ENDPOINT}/user/todo/${id}`,{
       method:"PUT",
       headers: {
@@ -84,7 +86,8 @@ function App() {
       body:JSON.stringify({
         title,
         description,
-        completed
+        completed,
+        color
       })
     });
 
@@ -210,6 +213,7 @@ function App() {
           title: data.title,
           description: data.description,
           completed: data.completed,
+          color: data.color
         }
       }));
     }

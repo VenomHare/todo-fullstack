@@ -6,10 +6,10 @@ type Props = {
     mode: "create" | "edit" | "view";
     setEditBlock: React.Dispatch<React.SetStateAction<boolean>>;
     deleteTask: (id: string) => void;
-    addTask: (title: string, description: string) => Promise<string | -1>;
+    addTask: (title: string, description: string, color:string) => Promise<string | -1>;
     setEditMode: React.Dispatch<React.SetStateAction<"view" | "create" | "edit">>;
     setActiveTask: React.Dispatch<React.SetStateAction<Task | undefined>>;
-    editTask: (id: string, title: string, description: string, completed: boolean) => void;
+    editTask: (id: string, title: string, description: string, color:string, completed: boolean) => void;
 }
 
 const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEditMode, addTask, setActiveTask, editTask }) => {
@@ -18,11 +18,12 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
         e.preventDefault();
         const title = (e.currentTarget[0] as HTMLInputElement).value;
         const description = (e.currentTarget[1] as HTMLTextAreaElement).value;
+        const color = (e.currentTarget[2] as HTMLTextAreaElement).value;
 
-        if (title && description) {
-            const id = addTask(title, description).toString();
+        if (title && description && color) {
+            const id = addTask(title, description, color).toString();
             if (id) {
-                setActiveTask({ id, title, description, completed: false });
+                setActiveTask({ id, title, description, color, completed: false });
                 setEditMode("view");
             }
         }
@@ -40,7 +41,11 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
                         <input type="text" className='w-[90%] p-2 rounded text-center outline-0 border-1 border-indigo-300' maxLength={100} required placeholder="Enter Task" />
 
                         <div>Description</div>
-                        <textarea className='w-[90%] min-h-[50%] p-2 rounded text-center outline-0 border-1 border-indigo-300' required placeholder="Description" />
+                        <textarea className='w-[90%] min-h-[35%] p-2 rounded text-center outline-0 border-1 border-indigo-300' required placeholder="Description" />
+                        <div className="flex gap-2 items-center">
+                            <div>Todo Color : </div>
+                            <input type="color" className='w-[2svw] h-[2svw]' defaultValue={task?.color}/>
+                        </div>
                         <div className="flex gap-4 text-xl">
                             <button type='submit' className='p-2 rounded bg-indigo-400 cursor-pointer active:scale-[.99]'>Create Todo</button>
                             <button type="reset" className='p-2 rounded bg-red-800 cursor-pointer active:scale-[.99]' onClick={() => { setEditBlock(false) }} >Close</button>
@@ -52,9 +57,10 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
                         e.preventDefault();
                         const title = (e.currentTarget[0] as HTMLInputElement).value;
                         const description = (e.currentTarget[1] as HTMLTextAreaElement).value;
-                        if (title && description) {
-                            editTask(task?.id!, title, description, task?.completed!);
-                            setActiveTask({ id: task?.id!, title, description, completed: task?.completed! });
+                        const color = (e.currentTarget[2] as HTMLTextAreaElement).value;
+                        if (title && description && color) {
+                            editTask(task?.id!, title, description, color, task?.completed!);
+                            setActiveTask({ id: task?.id!, title, description, color, completed: task?.completed! });
                         }
                     }}>
                         <h1 className='text-5xl font-poppins text-white'>Edit Todo</h1>
@@ -63,7 +69,11 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
                         <input type="text" className='w-[90%] p-2 rounded text-center outline-0 border-1 border-indigo-300' maxLength={100} required defaultValue={task?.title} placeholder="Enter Task" />
 
                         <div>Description</div>
-                        <textarea className='w-[90%] min-h-[50%] p-2 rounded text-center outline-0 border-1 border-indigo-300' required placeholder="Description" defaultValue={task?.description} />
+                        <textarea className='w-[90%] min-h-[35%] p-2 rounded text-center outline-0 border-1 border-indigo-300' required placeholder="Description" defaultValue={task?.description} />
+                        <div className="flex gap-2 items-center">
+                            <div>Todo Color : </div>
+                            <input type="color" className='w-[2svw] h-[2svw]' defaultValue={task?.color}/>
+                        </div>
                         <div className="flex gap-4 text-xl">
                             <button type='submit' className='p-2 rounded bg-indigo-400 cursor-pointer active:scale-[.99]' >Confirm</button>
                             <button type="reset" className='p-2 rounded bg-red-800 cursor-pointer active:scale-[.99]' onClick={() => { setEditBlock(false) }}>Close</button>
@@ -86,8 +96,8 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
                             {
                                 !task?.completed && <>
                                     <button className='p-2 rounded bg-green-400 cursor-pointer active:scale-[.99]' onClick={()=>{ 
-                                        editTask(task?.id!, task?.title!, task?.description!, true);
-                                        setActiveTask({id:task?.id!, title: task?.title!, description: task?.description!, completed: true});
+                                        editTask(task?.id!, task?.title!, task?.description!, task?.color!, true);
+                                        setActiveTask({id:task?.id!, title: task?.title!, color:task?.color!, description: task?.description!, completed: true});
                                     }}>Mark as Done</button>
                                     <button className='p-2 rounded bg-indigo-400 cursor-pointer active:scale-[.99]' onClick={() => { setEditMode("edit") }}>Edit</button>
                                 </>

@@ -13,6 +13,7 @@ const TodoSchema = new mongoose.Schema({
     title: String,
     description: String,
     completed: Boolean,
+    color: String,
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
 });
 
