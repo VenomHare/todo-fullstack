@@ -27,7 +27,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
 
-  const ENDPOINT = "http://localhost:3010";
+  const ENDPOINT = "https://todosbackend.venomhare.space";
 
   const addTask = async (title: string, description: string) => {
     const req = await fetch(`${ENDPOINT}/user/todo`, {
