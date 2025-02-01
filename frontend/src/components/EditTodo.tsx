@@ -58,7 +58,8 @@ const EditTodo: React.FC<Props> = ({ task, mode, setEditBlock, deleteTask, setEd
                         const title = (e.currentTarget[0] as HTMLInputElement).value;
                         const description = (e.currentTarget[1] as HTMLTextAreaElement).value;
                         const color = (e.currentTarget[2] as HTMLTextAreaElement).value;
-                        if (title && description && color) {
+                        console.log(color);
+			if (title && description && color) {
                             editTask(task?.id!, title, description, color, task?.completed!);
                             setActiveTask({ id: task?.id!, title, description, color, completed: task?.completed! });
                         }

@@ -1,11 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from 'jsonwebtoken';  
 import { TodoUser } from "../db";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-export const JWT_SECRET= process.env.JWT_SECRET || "";
+export const JWT_SECRET= "pleasedontleakthisone";
 export const userMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 
     try {

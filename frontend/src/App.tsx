@@ -77,7 +77,8 @@ function App() {
   }
 
   const editTask = async (id: string, title: string, description: string, color:string, completed: boolean) => {
-    const req = await fetch(`${ENDPOINT}/user/todo/${id}`,{
+   console.log(color);  
+   const req = await fetch(`${ENDPOINT}/user/todo/${id}`,{
       method:"PUT",
       headers: {
         "authorization": `Bearer ${token}`,

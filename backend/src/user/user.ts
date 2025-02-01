@@ -2,12 +2,10 @@ import { Router } from "express";
 import { Todo, TodoUser } from "../db";
 import jwt from "jsonwebtoken";
 import {userMiddleware} from "../middleware/user";
-import {config} from 'dotenv';
-config();
 
 const userRouter = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
+const JWT_SECRET = "pleasedontleakthisone";
 
 userRouter.post('/signup',async (req, res) => {
     try {
@@ -37,9 +35,8 @@ userRouter.post('/signup',async (req, res) => {
 
 userRouter.post('/login', async (req, res) => {
     try {
-        console.log(JWT_SECRET);
         const { username, password } = req.body;
-        console.log(req.body);
+    	
         if (!username || !password) {
             res.status(400).json({ message: 'Username and password are required' });
             return
@@ -49,8 +46,10 @@ userRouter.post('/login', async (req, res) => {
             res.status(403).json({ message: 'Invalid username or password' });
             return
         }
+	console.log(JWT_SECRET);
         const token = jwt.sign({ username }, JWT_SECRET);
-        res.json({ token });
+        console.log(token);
+	res.json({ token });
         return
     }
     catch(err)
@@ -66,7 +65,7 @@ userRouter.get('/todos', userMiddleware ,async (req, res) => {
         const user = await TodoUser.findOne({username}).populate("todos");
 
         res.json({todos: user?.todos});
-
+	
     }
     catch(err){
         res.status(500).json({message:"Error while fetching todos"})
@@ -129,6 +128,7 @@ userRouter.get("/todo/:id",userMiddleware, async (req,res)=>{
 userRouter.put("/todo/:id", userMiddleware,async (req, res) => {
     
     try {
+	
         const { id } = req.params;
         const { title, description, color, completed, username} = req.body;
         
@@ -144,6 +144,7 @@ userRouter.put("/todo/:id", userMiddleware,async (req, res) => {
         {
             res.status(403).json({message:"Unauthorized"});
         }
+
 
         await Todo.updateOne({_id: todo?._id},{
             "$set":{
