@@ -194,13 +194,9 @@ const App: React.FC<Props> = ({ token, setToken }) => {
         <div className="w-full h-[90%] flex flex-wrap gap-4 max-md:justify-center items-start content-start overflow-x-hidden overflow-y-auto">
           {
             tasks.map(task => <>
-
               <Drawer>
                 <DrawerTrigger>
-
-
-                  <Card className='max-w-[40svw]'>
-
+                  <Card className='max-w-[40svw] max-md:max-w-[95%]'>
                     <CardHeader>
                       <CardTitle className='flex flex-col items-center justify-center gap-2'>
                         {task.completed && <Badge variant="secondary"><CheckCheckIcon />Completed</Badge>}
