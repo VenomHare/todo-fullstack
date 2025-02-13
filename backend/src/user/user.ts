@@ -59,6 +59,12 @@ userRouter.post('/login', async (req, res) => {
     }
 });
 
+
+userRouter.post("/username",userMiddleware, async (req, res)=>{
+    const {username} = req.body;
+    res.status(200).json({username});
+})
+
 userRouter.get('/todos', userMiddleware ,async (req, res) => {
     try{
         const {username} = req.body;

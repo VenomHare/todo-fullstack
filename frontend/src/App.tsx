@@ -1,8 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import './App.css'
-import Block from './components/Block'
-import EditTodo from './components/EditTodo';
-import { Bounce, toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
+import DashboardLayout from './components/layouts/DashboardLayout';
+import { Card, CardDescription, CardHeader, CardTitle } from './components/ui/card';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTrigger } from './components/ui/drawer';
+import { Button } from './components/ui/button';
+import { SidebarTrigger } from './components/ui/sidebar';
+import { Badge } from './components/ui/badge';
+import { CheckCheck, CheckCheckIcon, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
+import EditTodoForm from './components/EditTodoForm';
+import { Label } from './components/ui/label';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './components/ui/context-menu';
 
 export type Task = {
   id: string;
@@ -12,30 +22,35 @@ export type Task = {
   completed: boolean;
 }
 
-enum Screens {
-  SignUp,
-  SignIn,
-  Dashboard
+
+export const ENDPOINT = "https://todosbackend.venomhare.space";
+
+type Props = {
+  token: string | undefined,
+  setToken: React.Dispatch<React.SetStateAction<string | undefined>>,
+  loading: boolean,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function App() {
+
+const App: React.FC<Props> = ({ token, setToken }) => {
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [editBlock, setEditBlock] = useState(false);
   const [editMode, setEditMode] = useState<"view" | "create" | "edit">('view');
   const [activetask, setActiveTask] = useState<Task>();
-  const [currentScreen, setCurrentScreen] = useState<Screens>(Screens.SignIn);
-  const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState("");
-  
-  const ENDPOINT = "https://todosbackend.venomhare.space";
+
+  const [editTodoBool, setEditTodoBool] = useState(false);
+  const [username, setUsername] = useState("");
+
+
 
   const addTask = async (title: string, description: string, color: string) => {
     const req = await fetch(`${ENDPOINT}/user/todo`, {
       method: "POST",
       headers: {
         "authorization": `Bearer ${token}`,
-        "Content-Type":"application/json"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         title,
@@ -76,15 +91,15 @@ function App() {
     }
   }
 
-  const editTask = async (id: string, title: string, description: string, color:string, completed: boolean) => {
-   console.log(color);  
-   const req = await fetch(`${ENDPOINT}/user/todo/${id}`,{
-      method:"PUT",
+  const editTask = async (id: string, title: string, description: string, color: string, completed: boolean) => {
+    console.log(color);
+    const req = await fetch(`${ENDPOINT}/user/todo/${id}`, {
+      method: "PUT",
       headers: {
         "authorization": `Bearer ${token}`,
-        "Content-Type":"application/json"
+        "Content-Type": "application/json"
       },
-      body:JSON.stringify({
+      body: JSON.stringify({
         title,
         description,
         completed,
@@ -109,96 +124,17 @@ function App() {
   const fail = (s: string) => {
     toast.error(s, {
       position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Bounce,
     });
   }
 
   const success = (s: string) => {
     toast.success(s, {
       position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Bounce,
     });
   }
 
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    const username = (e.currentTarget[0] as HTMLInputElement).value;
-    const password = (e.currentTarget[1] as HTMLInputElement).value;
 
-    const req = await fetch(`${ENDPOINT}/user/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    });
-
-    const res = await req.json();
-    if (req.status == 400) {
-      setLoading(false);
-    }
-    else if (req.status == 403) {
-      setLoading(false);
-      fail(res.message);
-    }
-    else if (req.status == 200) {
-      localStorage.setItem("sk00dev_oauth", res.token);
-      setLoading(false);
-      setToken(res.token);
-      update(res.token);
-      setCurrentScreen(Screens.Dashboard);
-    }
-  }
-
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    const username = (e.currentTarget[0] as HTMLInputElement).value;
-    const password = (e.currentTarget[1] as HTMLInputElement).value;
-
-    const req = await fetch(`${ENDPOINT}/user/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    });
-
-    const res = await req.json();
-    if (req.status !== 200) {
-      setLoading(false);
-      fail(res.message);
-    }
-    else {
-      localStorage.setItem("sk00dev_oauth", res.token);
-      setLoading(false);
-      setToken(res.token);
-      update(res.token);
-      setCurrentScreen(Screens.Dashboard);
-    }
-  }
   const update = async (t?: string) => {
     const req = await fetch(`${ENDPOINT}/user/todos`, {
       headers: {
@@ -218,122 +154,171 @@ function App() {
         }
       }));
     }
-    else { 
+    else {
       fail(res.message);
     }
+  }
+  const MarkAsDone = (todo: Task) => {
+    editTask(todo.id, todo.title, todo.description, todo.color, true);
   }
 
   //hooks
   useEffect(() => {
     const loctoken = localStorage.getItem("sk00dev_oauth");
     if (loctoken) {
-      setCurrentScreen(Screens.Dashboard);
       setToken(loctoken!);
+      fetch(`${ENDPOINT}/user/username`,{
+        method:'POST',
+        headers:{
+          "Content-Type":"application/json",
+          'authorization': `Bearer ${loctoken}`
+        }
+      }).then((req)=>req.json().then((res)=>{
+        console.log(res);
+        if (![401, 400, 500].includes(req.status)) {
+          setUsername(res.username);
+        } 
+        else {
+          fail(res.message);
+        }
+      }));
       update(loctoken);
     }
     else {
-      setCurrentScreen(Screens.SignIn);
+      window.location.href = "/login";
     }
   }, [])
 
   return (
-    <div className='w-full h-screen flex items-center flex-col gap-5 bg-slate-800 font-poppins text-white'>
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover={false}
-        theme="dark"
-        transition={Bounce}
-      />
-
-      {
-        currentScreen == Screens.Dashboard && <>
-          <button className='p-2 rounded bg-indigo-400 cursor-pointer active:scale-[.99]' onClick={()=>{localStorage.removeItem("sk00dev_oauth"); setCurrentScreen(Screens.SignIn)}}>Logout</button>
-          <h1 className='text-5xl font-poppins' >Todo App</h1>
-          <button className='p-2 rounded bg-indigo-400 cursor-pointer active:scale-[.99]' onClick={() => {
-            setEditMode('create');
-            setEditBlock(true);
-          }}>Add Todo</button>
-          <div className="w-[85%] h-[85%] relative overflow-auto gap-2 bg-stone-500 rounded-xl flex flex-wrap justify-center items-start content-start p-2" id="container">
-            {editBlock && <EditTodo mode={editMode} task={activetask} setEditBlock={setEditBlock} deleteTask={deleteTask} editTask={editTask} setEditMode={setEditMode} setActiveTask={setActiveTask} addTask={addTask} />}
-            {
-              tasks.map((task: Task) => (
-                <Block task={task} key={task.id} setTask={setActiveTask} setEditBlock={setEditBlock} setEditMode={setEditMode} />
-              ))
-            }
-
+    <DashboardLayout addTask={addTask} username={username}>
+      <div className='size-full flex flex-col justify-evenly items-start p-4'>
+        <div className="w-full flex gap-4 items-center">
+          <div>
+            <SidebarTrigger />
           </div>
-        </>
-      }
-      {
-        currentScreen == Screens.SignIn && <>
-          <form className="w-[500px] h-[550px] m-5 rounded-xl bg-zinc-800 flex flex-col items-center justify-around relative overflow-hidden" onSubmit={handleLogin}>
-            {
-              loading && <>
-                <div className="spinnerparent">
-                  <div className="spinner"></div>
-                </div>
-              </>
-            }
-            <div className="text-4xl font-semibold font-poppins text-center">Welcome Back !!</div>
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col">
-                <div className='text-md px-2'>Username</div>
-                <input type="text" id="usern" className='w-[450px] bg-zinc-600 outline-0 p-3 rounded' required />
-              </div>
-              <div className="flex flex-col">
-                <div className='text-md px-2'>Password</div>
-                <input type="password" id="pass" className='w-[450px] bg-zinc-600 outline-0 p-3 rounded' required />
-              </div>
-            </div>
-            <button type='submit' className='text-2xl w-[450px] rounded-xl py-3 bg-zinc-600 cursor-pointer'>Sign In</button>
-            <div className='flex items-center gap-5'>
-              <div className='w-[175px] h-[1px] bg-zinc-100'></div>
-              <div className=''>or</div>
-              <div className='w-[175px] h-[1px] bg-zinc-100'></div>
-            </div>
-            <button className='text-2xl w-[450px] rounded-xl py-3 bg-zinc-600 cursor-pointer' onClick={() => { setCurrentScreen(Screens.SignUp) }}>Register</button>
-          </form>
-        </>
-      }
-      {
-        currentScreen == Screens.SignUp && <>
-          <form className="w-[500px] h-[550px] relative m-5 rounded-xl bg-zinc-800 flex flex-col items-center justify-around overflow-hidden" onSubmit={handleRegister}>
-            {
-              loading && <>
-                <div className="spinnerparent">
-                  <div className="spinner"></div>
-                </div>
-              </>
-            }
-            <div className="text-4xl font-semibold font-poppins text-center">Welcome OnBoard !!</div>
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col">
-                <div className='text-md px-2'>Username</div>
-                <input type="text" id="usern" className='w-[450px] bg-zinc-600 outline-0 p-3 rounded' required />
-              </div>
-              <div className="flex flex-col">
-                <div className='text-md px-2'>Password</div>
-                <input type="password" id="pass" className='w-[450px] bg-zinc-600 outline-0 p-3 rounded' required />
-              </div>
-            </div>
-            <button type='submit' className='text-2xl w-[450px] rounded-xl py-3 bg-zinc-600 cursor-pointer'>Register</button>
-            <div className='flex items-center gap-5'>
-              <div className='w-[175px] h-[1px] bg-zinc-100'></div>
-              <div className=''>or</div>
-              <div className='w-[175px] h-[1px] bg-zinc-100'></div>
-            </div>
-            <button className='text-2xl w-[450px] rounded-xl py-3 bg-zinc-600 cursor-pointer' onClick={() => { setCurrentScreen(Screens.SignIn) }}>Sign In</button>
-          </form>
-        </>
-      }
-    </div>
+          <h1 className='text-4xl font-semibold mx-5'>Active Todos</h1>
+        </div>
+        <div className="w-full h-[90%] flex flex-wrap gap-4 max-md:justify-center items-start content-start overflow-x-hidden overflow-y-auto">
+          {
+            tasks.map(task => <>
+
+              <Drawer>
+                <DrawerTrigger>
+
+
+                  <Card className='max-w-[40svw]'>
+
+                    <CardHeader>
+                      <CardTitle className='flex flex-col items-center justify-center gap-2'>
+                        {task.completed && <Badge variant="secondary"><CheckCheckIcon />Completed</Badge>}
+                        <p>{task.title}</p>
+                      </CardTitle>
+                      <CardDescription>{task.description.length > 100 ? (
+                        <p>
+                          {task.description.slice(0, 400).split("\n").map(l => <p>{l}</p>)} <p className='underline'>Read more</p>
+                        </p>
+                      )
+                        :
+                        task.description.split("\n").map(l => <p>{l}</p>)
+                      }</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <div className="h-[75svh] w-full flex flex-col justify-evenly items-center">
+                    <DrawerHeader className='flex gap-3 items-center'>
+                      <h3 className="text-4xl font-semibold text-center">{task.title}</h3>
+                      {
+                        task.completed && <Badge variant="secondary"> <CheckCheckIcon /> Completed</Badge>
+                      }
+                    </DrawerHeader>
+                    <div className="text-xl max-w-[90%] overflow-x-hidden overflow-y-auto" >
+                      {task.description.split("\n").map(l => <p>{l}</p>)}
+                    </div>
+                    <div className="flex gap-3 items-center justify-center">
+
+                      {
+                        !task.completed && (
+                          <>
+                            <Dialog open={editTodoBool} onOpenChange={setEditTodoBool}>
+                              <DialogTrigger>
+                                <Button>Edit</Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Edit Todo</DialogTitle>
+                                  <DialogDescription >
+                                    <p>Enter details to edit</p>
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex gap-3 items-center">
+                                  <Label htmlFor='todoid'>Todo Id :</Label>
+                                  <Badge id="todoid" variant="outline">{task.id}</Badge>
+                                </div>
+                                <EditTodoForm todo={task} editTask={editTask} setOpen={setEditTodoBool} />
+                              </DialogContent>
+                            </Dialog>
+
+                          </>
+                        )
+                      }
+                      <AlertDialog>
+                        <AlertDialogTrigger>
+                          <Button className='hover:bg-red-900'>Remove</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure you want to delete the todo?</AlertDialogTitle>
+                            <AlertDialogDescription className='flex flex-col gap-2 items-start'>
+                              <p>This action cannot be undone. This will permanently delete your Todo.</p>
+                              <Badge variant="outline">Todo Id: {task.id}</Badge>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <DrawerClose>
+                              <AlertDialogAction className='bg-red-900' onClick={() => { deleteTask(task.id) }}><Trash2 />Delete</AlertDialogAction>
+                            </DrawerClose>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      {
+                        !task.completed && (
+                          <>
+                            <AlertDialog>
+                              <AlertDialogTrigger>
+                                <Button >Mark As Done</Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure you want to Change the todo status?</AlertDialogTitle>
+                                  <AlertDialogDescription className='flex flex-col gap-2 items-start'>
+                                    <p>The todo will be Marked as Done. This is irreversible action.</p>
+                                    <Badge variant="outline">Todo Id: {task.id}</Badge>
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <DrawerClose>
+                                    <AlertDialogAction onClick={() => { MarkAsDone(task) }}><CheckCheck />Mark as Done</AlertDialogAction>
+                                  </DrawerClose>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        )
+                      }
+                    </div>
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            </>)
+          }
+
+        </div>
+      </div>
+    </DashboardLayout>
   )
 }
 
