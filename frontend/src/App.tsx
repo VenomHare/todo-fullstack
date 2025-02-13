@@ -12,7 +12,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
 import EditTodoForm from './components/EditTodoForm';
 import { Label } from './components/ui/label';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from './components/ui/context-menu';
 
 export type Task = {
   id: string;
@@ -36,9 +35,6 @@ type Props = {
 const App: React.FC<Props> = ({ token, setToken }) => {
 
   const [tasks, setTasks] = useState<Task[]>([])
-  const [editBlock, setEditBlock] = useState(false);
-  const [editMode, setEditMode] = useState<"view" | "create" | "edit">('view');
-  const [activetask, setActiveTask] = useState<Task>();
 
   const [editTodoBool, setEditTodoBool] = useState(false);
   const [username, setUsername] = useState("");
@@ -81,8 +77,6 @@ const App: React.FC<Props> = ({ token, setToken }) => {
 
     const res = await req.json();
     if (![401, 400, 500].includes(req.status)) {
-      setEditBlock(false);
-      setActiveTask(undefined);
       update();
       success("Todo Deleted");
     }
@@ -111,7 +105,6 @@ const App: React.FC<Props> = ({ token, setToken }) => {
 
     if (![401, 400, 500].includes(req.status)) {
       await update();
-      setEditMode("view");
       success("Todo Updated");
     }
     else {
