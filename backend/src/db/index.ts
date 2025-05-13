@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const DATABASE_URL="mongodb+srv://admin:WOO5ZxQ5TqI6GOdM@localdevelopment.mkdh9.mongodb.net/"
+//DATABASE URL HERE
+const DATABASE_URL=process.env.MONGO_URL || "";
 mongoose.connect(DATABASE_URL);
 
 const UserSchema = new mongoose.Schema({

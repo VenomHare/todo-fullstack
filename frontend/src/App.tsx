@@ -22,7 +22,7 @@ export type Task = {
 }
 
 
-export const ENDPOINT = "https://todosbackend.venomhare.space";
+export const ENDPOINT = "http://localhost:3010";
 
 type Props = {
   token: string | undefined,
